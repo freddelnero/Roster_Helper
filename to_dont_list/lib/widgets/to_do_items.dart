@@ -5,12 +5,12 @@ typedef ToDoListChangedCallback = Function(Item item, bool completed);
 typedef ToDoListRemovedCallback = Function(Item item);
 
 class ToDoListItem extends StatelessWidget {
-  ToDoListItem(
-      {required this.item,
-      required this.completed,
-      required this.onListChanged,
-      required this.onDeleteItem})
-      : super(key: ObjectKey(item));
+  ToDoListItem({
+    required this.item,
+    required this.completed,
+    required this.onListChanged,
+    required this.onDeleteItem,
+  }) : super(key: ObjectKey(item));
 
   final Item item;
   final bool completed;
@@ -25,7 +25,7 @@ class ToDoListItem extends StatelessWidget {
     // taking place and therefore which theme to use.
 
     return completed //
-        ? Colors.black
+        ? Colors.black54
         : Theme.of(context).primaryColor;
   }
 
@@ -51,12 +51,9 @@ class ToDoListItem extends StatelessWidget {
           : null,
       leading: CircleAvatar(
         backgroundColor: _getColor(context),
-        child: Text(item.name),
+        child: Text(item.abbrev()),
       ),
-      title: Text(
-        item.abbrev(),
-        style: _getTextStyle(context),
-      ),
+      title: Text(item.name, style: _getTextStyle(context)),
     );
   }
 }

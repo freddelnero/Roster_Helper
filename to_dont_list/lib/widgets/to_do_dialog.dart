@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
 typedef ToDoListAddedCallback = Function(
-    String value, TextEditingController textConroller);
+  String value,
+  TextEditingController textConroller,
+);
 
 class ToDoDialog extends StatefulWidget {
-  const ToDoDialog({
-    super.key,
-    required this.onListAdded,
-  });
+  const ToDoDialog({super.key, required this.onListAdded});
 
   final ToDoListAddedCallback onListAdded;
 
@@ -19,9 +18,13 @@ class _ToDoDialogState extends State<ToDoDialog> {
   // Dialog with text from https://www.appsdeveloperblog.com/alert-dialog-with-a-text-field-in-flutter/
   final TextEditingController _inputController = TextEditingController();
   final ButtonStyle yesStyle = ElevatedButton.styleFrom(
-      textStyle: const TextStyle(fontSize: 20), backgroundColor: Colors.green);
+    textStyle: const TextStyle(fontSize: 20),
+    backgroundColor: Colors.green,
+  );
   final ButtonStyle noStyle = ElevatedButton.styleFrom(
-      textStyle: const TextStyle(fontSize: 20), backgroundColor: Colors.red);
+    textStyle: const TextStyle(fontSize: 20),
+    backgroundColor: Colors.red,
+  );
 
   String valueText = "";
 
@@ -40,10 +43,11 @@ class _ToDoDialogState extends State<ToDoDialog> {
       ),
       actions: <Widget>[
         ElevatedButton(
-          key: const Key("OkButton"),
+          key: const Key("OKButton"),
           style: yesStyle,
           child: const Text('OK'),
           onPressed: () {
+            widget.onListAdded(_inputController.text, _inputController);
             setState(() {
               Navigator.pop(context);
             });
