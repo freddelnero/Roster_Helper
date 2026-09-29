@@ -1,204 +1,119 @@
 import 'package:flutter/material.dart';
+import 'package:to_dont_list/objects/player.dart';
+import 'package:to_dont_list/widgets/player_tile.dart';
+import 'package:to_dont_list/widgets/to_do_dialog.dart';
 
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    const String appTitle = 'Flutter layout demo';
-    return MaterialApp(
-      title: appTitle,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(appTitle)),
-        body: const SingleChildScrollView(
-          child: Column(
-            children: [
-              ImageSection(
-                image: 'images/lake.jpg',
-              ),
-              TitleSection(
-                name: 'Oeschinen Lake Campground',
-                location: 'Kandersteg, Switzerland',
-              ),
-              ButtonSection(),
-              TextSection(
-                description:
-                    'Lake Oeschinen lies at the foot of the Blüemlisalp in the '
-                    'Bernese Alps. Situated 1,578 meters above sea level, it '
-                    'is one of the larger Alpine Lakes. A gondola ride from '
-                    'Kandersteg, followed by a half-hour walk through pastures '
-                    'and pine forest, leads you to the lake, which warms to 20 '
-                    'degrees Celsius in the summer. Activities enjoyed here '
-                    'include rowing, and riding the summer toboggan run.',
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+void main() {
+  runApp(const MaterialApp(
+    title: 'Pickup Roster',
+    home: ToDoList(),
+  )); // MateriaApp
 }
 
-class TitleSection extends StatelessWidget {
-  const TitleSection({super.key, required this.name, required this.location});
+class ToDoList extends StatefulWidget {
+  // StatefulWidget because the list of players can change
+  const ToDoList({super.key});
 
-  final String name;
-  final String location;
+  @override
+  State<ToDoList> createState() =>
+      _ToDoListState(); // Create the state for the ToDoList widget
+}
+
+class _ToDoListState extends State<ToDoList> {
+  // State class for the ToDoList widget
+  final List<Player> players = [];
+  bool showConfirmedOnly = false;
+
+  void _handleNewPlayer(
+    // Callback function to handle adding a new player
+    String name,
+    TextEditingController textController,
+  ) {
+    if (name.trim().isEmpty) return;
+
+    setState(() {
+      players.insert(0, Player(name: name.trim()));
+      textController.clear();
+    });
+  }
+
+  void _togglePlayer(Player player) {
+    // Callback function to toggle the confirmed status of a player
+    setState(() {
+      player.toggleConfirmed();
+    });
+  }
+
+  void _removePlayer(Player player) {
+    // Callback function to remove a player from the list
+    setState(() {
+      players.remove(player);
+    });
+  }
+
+  void _toggleFilter() {
+    // Callback function to toggle the filter for showing only confirmed players
+    setState(() {
+      showConfirmedOnly = !showConfirmedOnly;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Row(
+    final confirmedCount = players.where((player) => player.confirmed).length;
+
+    final visiblePlayers = showConfirmedOnly
+        ? players.where((player) => player.confirmed).toList()
+        : players;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Pickup Roster')),
+      body: Column(
         children: [
-          Expanded(
-            /*1*/
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                /*2*/
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                Expanded(
                   child: Text(
-                    name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    'Confirmed: $confirmedCount / ${players.length}',
                   ),
                 ),
-                Text(location, style: TextStyle(color: Colors.grey[500])),
+                TextButton(
+                  onPressed: _toggleFilter,
+                  child: Text(
+                    showConfirmedOnly ? 'Show all' : 'Confirmed only',
+                  ),
+                ),
               ],
             ),
           ),
-          /*3*/
-          const FavoriteWidget(),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: visiblePlayers.map((player) {
+                return PlayerTile(
+                  player: player,
+                  onToggle: () => _togglePlayer(player),
+                  onRemove: () => _removePlayer(player),
+                );
+              }).toList(),
+            ),
+          ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: 'Add player',
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (_) => ToDoDialog(
+              onListAdded: _handleNewPlayer,
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
-}
-
-class ButtonSection extends StatelessWidget {
-  const ButtonSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final Color color = Theme.of(context).primaryColor;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Icon(Icons.call, color: color),
-        Icon(Icons.near_me, color: color),
-        Icon(Icons.share, color: color),
-      ],
-    );
-  }
-}
-
-class ButtonWithText extends StatelessWidget {
-  const ButtonWithText({
-    super.key,
-    required this.color,
-    required this.icon,
-    required this.label,
-  });
-
-  final Color color;
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: color),
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class TextSection extends StatelessWidget {
-  const TextSection({
-    super.key,
-    required this.description,
-  });
-
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Text(description, softWrap: true),
-    );
-  }
-}
-
-class ImageSection extends StatelessWidget {
-  const ImageSection({super.key, required this.image});
-
-  final String image;
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.asset(image, width: 600, height: 240, fit: BoxFit.cover);
-  }
-}
-
-class _FavoriteWidgetState extends State<FavoriteWidget> {
-  bool _isFavorited = true;
-  int _favoriteCount = 41;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(0),
-          child: IconButton(
-            padding: const EdgeInsets.all(0),
-            alignment: Alignment.center,
-            icon: (_isFavorited
-                ? const Icon(Icons.star)
-                : const Icon(Icons.star_border)),
-            color: Colors.red[500],
-            onPressed: _toggleFavorite,
-          ),
-        ),
-        SizedBox(width: 18, child: SizedBox(child: Text('$_favoriteCount'))),
-      ],
-    );
-  }
-
-  void _toggleFavorite() {
-    setState(() {
-      if (_isFavorited) {
-        _favoriteCount -= 1;
-        _isFavorited = false;
-      } else {
-        _favoriteCount += 1;
-        _isFavorited = true;
-      }
-    });
-  }
-}
-
-class FavoriteWidget extends StatefulWidget {
-  const FavoriteWidget({super.key});
-
-  @override
-  State<FavoriteWidget> createState() => _FavoriteWidgetState();
 }
