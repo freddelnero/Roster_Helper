@@ -1,87 +1,204 @@
-// Started with https://docs.flutter.dev/development/ui/widgets-intro
 import 'package:flutter/material.dart';
-import 'package:to_dont_list/objects/item.dart';
-import 'package:to_dont_list/widgets/to_do_items.dart';
-import 'package:to_dont_list/widgets/to_do_dialog.dart';
 
-class ToDoList extends StatefulWidget {
-  const ToDoList({super.key});
+void main() => runApp(const MyApp());
 
-  @override
-  State createState() => _ToDoListState();
-}
-
-class _ToDoListState extends State<ToDoList> {
-  final List<Item> items = [const Item(name: "add more todos")];
-  final _itemSet = <Item>{};
-
-  void _handleListChanged(Item item, bool completed) {
-    setState(() {
-      // When a user changes what's in the list, you need
-      // to change _itemSet inside a setState call to
-      // trigger a rebuild.
-      // The framework then calls build, below,
-      // which updates the visual appearance of the app.
-
-      items.remove(item);
-      if (!completed) {
-        print("Completing");
-        _itemSet.add(item);
-        items.add(item);
-      } else {
-        print("Making Undone");
-        _itemSet.remove(item);
-        items.insert(0, item);
-      }
-    });
-  }
-
-  void _handleDeleteItem(Item item) {
-    setState(() {
-      print("Deleting item");
-      items.remove(item);
-    });
-  }
-
-  void _handleNewItem(String itemText, TextEditingController textController) {
-    setState(() {
-      print("Adding new item");
-      final item = Item(name: itemText);
-      items.insert(0, item);
-      textController.clear();
-    });
-  }
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('To Do List')),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        children: items.map((item) {
-          return ToDoListItem(
-            item: item,
-            completed: _itemSet.contains(item),
-            onListChanged: _handleListChanged,
-            onDeleteItem: _handleDeleteItem,
-          );
-        }).toList(),
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (_) {
-              return ToDoDialog(onListAdded: _handleNewItem);
-            },
-          );
-        },
+    const String appTitle = 'Flutter layout demo';
+    return MaterialApp(
+      title: appTitle,
+      home: Scaffold(
+        appBar: AppBar(title: const Text(appTitle)),
+        body: const SingleChildScrollView(
+          child: Column(
+            children: [
+              ImageSection(
+                image: 'images/lake.jpg',
+              ),
+              TitleSection(
+                name: 'Oeschinen Lake Campground',
+                location: 'Kandersteg, Switzerland',
+              ),
+              ButtonSection(),
+              TextSection(
+                description:
+                    'Lake Oeschinen lies at the foot of the Blüemlisalp in the '
+                    'Bernese Alps. Situated 1,578 meters above sea level, it '
+                    'is one of the larger Alpine Lakes. A gondola ride from '
+                    'Kandersteg, followed by a half-hour walk through pastures '
+                    'and pine forest, leads you to the lake, which warms to 20 '
+                    'degrees Celsius in the summer. Activities enjoyed here '
+                    'include rowing, and riding the summer toboggan run.',
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-void main() {
-  runApp(const MaterialApp(title: 'To Do List', home: ToDoList()));
+class TitleSection extends StatelessWidget {
+  const TitleSection({super.key, required this.name, required this.location});
+
+  final String name;
+  final String location;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Row(
+        children: [
+          Expanded(
+            /*1*/
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /*2*/
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Text(location, style: TextStyle(color: Colors.grey[500])),
+              ],
+            ),
+          ),
+          /*3*/
+          const FavoriteWidget(),
+        ],
+      ),
+    );
+  }
+}
+
+class ButtonSection extends StatelessWidget {
+  const ButtonSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = Theme.of(context).primaryColor;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Icon(Icons.call, color: color),
+        Icon(Icons.near_me, color: color),
+        Icon(Icons.share, color: color),
+      ],
+    );
+  }
+}
+
+class ButtonWithText extends StatelessWidget {
+  const ButtonWithText({
+    super.key,
+    required this.color,
+    required this.icon,
+    required this.label,
+  });
+
+  final Color color;
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: color),
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class TextSection extends StatelessWidget {
+  const TextSection({
+    super.key,
+    required this.description,
+  });
+
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Text(description, softWrap: true),
+    );
+  }
+}
+
+class ImageSection extends StatelessWidget {
+  const ImageSection({super.key, required this.image});
+
+  final String image;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(image, width: 600, height: 240, fit: BoxFit.cover);
+  }
+}
+
+class _FavoriteWidgetState extends State<FavoriteWidget> {
+  bool _isFavorited = true;
+  int _favoriteCount = 41;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(0),
+          child: IconButton(
+            padding: const EdgeInsets.all(0),
+            alignment: Alignment.center,
+            icon: (_isFavorited
+                ? const Icon(Icons.star)
+                : const Icon(Icons.star_border)),
+            color: Colors.red[500],
+            onPressed: _toggleFavorite,
+          ),
+        ),
+        SizedBox(width: 18, child: SizedBox(child: Text('$_favoriteCount'))),
+      ],
+    );
+  }
+
+  void _toggleFavorite() {
+    setState(() {
+      if (_isFavorited) {
+        _favoriteCount -= 1;
+        _isFavorited = false;
+      } else {
+        _favoriteCount += 1;
+        _isFavorited = true;
+      }
+    });
+  }
+}
+
+class FavoriteWidget extends StatefulWidget {
+  const FavoriteWidget({super.key});
+
+  @override
+  State<FavoriteWidget> createState() => _FavoriteWidgetState();
 }
