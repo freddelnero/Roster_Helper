@@ -48,30 +48,18 @@ class _ToDoDialogState extends State<ToDoDialog> {
           child: const Text('OK'),
           onPressed: () {
             widget.onListAdded(_inputController.text, _inputController);
-            setState(() {
-              Navigator.pop(context);
-            });
+            Navigator.pop(context);
           },
         ),
 
         // https://stackoverflow.com/questions/52468987/how-to-turn-disabled-button-into-enabled-button-depending-on-conditions
-        ValueListenableBuilder<TextEditingValue>(
-          valueListenable: _inputController,
-          builder: (context, value, child) {
-            return ElevatedButton(
-              key: const Key("CancelButton"),
-              style: noStyle,
-              onPressed: value.text.isNotEmpty
-                  ? () {
-                      setState(() {
-                        widget.onListAdded(valueText, _inputController);
-                        Navigator.pop(context);
-                      });
-                    }
-                  : null,
-              child: const Text('Cancel'),
-            );
+        ElevatedButton(
+          key: const Key('CancelButton'),
+          style: noStyle,
+          onPressed: () {
+            Navigator.pop(context);
           },
+          child: const Text('Cancel'),
         ),
       ],
     );
