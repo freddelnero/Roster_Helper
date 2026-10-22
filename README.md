@@ -9,3 +9,11 @@ To run the program, go inside the folder to_dont_list, make sure
 that pubspec is inside and in the terminal run "flutter pub get" 
 to download and solve all packages listed in pubspec,
 and then run "flutter run" in the terminal. 
+
+The codes were based on the first 2 flutter projects I had, 
+and the modifications and addition comes from searching in: 
+(https://api.flutter.dev/flutter/widgets/State/setState.html)
+(https://docs.flutter.dev/cookbook/lists/basic-list)
+(https://api.flutter.dev/flutter/material/showDialog.html)
+
+
